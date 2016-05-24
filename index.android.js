@@ -3,114 +3,81 @@
  * https://github.com/facebook/react-native
  */
 
-import React, {
-  Component,
-} from 'react';
-import {
-  AppRegistry,
-  Image,
-  ListView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+ import React, {
+   Component,
+ } from 'react'
+ import {
+   AppRegistry,
+   BackAndroid,
+   Navigator,
+   StyleSheet,
+   ToolbarAndroid,
+   View,
+ } from 'react-native'
 
-var REQUEST_URL = 'https://raw.githubusercontent.com/facebook/react-native/master/docs/MoviesExample.json';
+ import MovieScreen from './MovieScreen'
+ import SearchScreen from './SearchScreen'
 
-class AwesomeProject extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      dataSource: new ListView.DataSource({
-        rowHasChanged: (row1, row2) => row1 !== row2,
-      }),
-      loaded: false,
-    };
+let _navigator
+BackAndroid.addEventListener('hardwareBackPress', () => {
+  if (_navigator && _navigator.getCurrentRoutes().length > 1) {
+    _navigator.pop()
+    return true
   }
+  return false
+})
 
-  componentDidMount() {
-    this.fetchData();
-  }
-
-  fetchData() {
-    fetch(REQUEST_URL)
-      .then((response) => response.json())
-      .then((responseData) => {
-        this.setState({
-          dataSource: this.state.dataSource.cloneWithRows(responseData.movies),
-          loaded: true,
-        });
-      })
-      .done();
-  }
-
-  render() {
-    if (!this.state.loaded) {
-      return this.renderLoadingView();
-    }
-
+const RouteMapper = function(route, navigationOperations, onComponentRef) {
+  _navigator = navigationOperations
+  if (route.name === 'search') {
     return (
-      <ListView
-        dataSource={this.state.dataSource}
-        renderRow={this.renderMovie}
-        style={styles.listView}
-      />
-    );
-  }
-
-  renderLoadingView() {
+      <SearchScreen navigator={navigationOperations} />
+    )
+  } else if (route.name === 'movie') {
     return (
-      <View style={styles.container}>
-        <Text>
-          Loading movies...
-        </Text>
-      </View>
-    );
-  }
-
-  renderMovie(movie) {
-    return (
-      <View style={styles.container}>
-        <Image
-          source={{uri: movie.posters.thumbnail}}
-          style={styles.thumbnail}
+      <View style={{flex: 1}}>
+        <ToolbarAndroid
+          actions={[]}
+          navIcon={require('image!android_back_white')}
+          onIconClicked={navigationOperations.pop}
+          style={styles.toolbar}
+          titleColor="white"
+          title={route.movie.title} />
+        <MovieScreen
+          style={{flex: 1}}
+          navigator={navigationOperations}
+          movie={route.movie}
         />
-        <View style={styles.rightContainer}>
-          <Text style={styles.title}>{movie.title}</Text>
-          <Text style={styles.year}>{movie.year}</Text>
-        </View>
       </View>
-    );
+    )
   }
 }
 
-var styles = StyleSheet.create({
+const AwesomeProject = React.createClass({
+  render: function() {
+    const initialRoute = {name: 'search'}
+    return (
+      <Navigator
+        style={styles.container}
+        initialRoute={initialRoute}
+        configureScene={() => Navigator.SceneConfigs.FadeAndroid}
+        renderScene={RouteMapper}
+      />
+    )
+  }
+})
+
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: 'white',
   },
-  rightContainer: {
-    flex: 1,
+  toolbar: {
+    backgroundColor: '#a9a9a9',
+    height: 56,
   },
-  title: {
-    fontSize: 20,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  year: {
-    textAlign: 'center',
-  },
-  thumbnail: {
-    width: 53,
-    height: 81,
-  },
-  listView: {
-    paddingTop: 20,
-    backgroundColor: '#F5FCFF',
-  },
-});
+})
 
-AppRegistry.registerComponent('AwesomeProject', () => AwesomeProject);
+AppRegistry.registerComponent('AwesomeProject', () => AwesomeProject)
+
+module.exports = AwesomeProject

@@ -6,7 +6,9 @@
     "start": "node node_modules/react-native/local-cli/cli.js start"
   },
   "dependencies": {
+    "fbjs": "^0.8.2",
     "react": "^0.14.8",
-    "react-native": "^0.25.1"
+    "react-native": "^0.25.1",
+    "react-timer-mixin": "^0.13.3"
   }
 }
